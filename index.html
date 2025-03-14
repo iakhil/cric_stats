@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#121212">
+    <title>Cricket Stats Guessing Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Cricket Stats Guessing Game</h1>
+        
+        <div class="mode-selection">
+            <h2>Select Game Mode</h2>
+            <div class="mode-buttons">
+                <button id="batting-mode" class="mode-btn active">Batting Stats</button>
+                <button id="bowling-mode" class="mode-btn">Bowling Stats</button>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="player-card">
+                <h2 id="player-name">Player Name</h2>
+                <p id="player-team">Team</p>
+                <p id="player-span">Career Span</p>
+            </div>
+
+            <div class="stat-selection">
+                <h3>Select a stat to guess:</h3>
+                <div id="batting-stats" class="stat-buttons">
+                    <button class="stat-btn" data-stat="matches">Matches</button>
+                    <button class="stat-btn" data-stat="runs">Runs</button>
+                    <button class="stat-btn" data-stat="average">Average</button>
+                    <button class="stat-btn" data-stat="hundreds">Hundreds</button>
+                    <button class="stat-btn" data-stat="fifties">Fifties</button>
+                </div>
+                <div id="bowling-stats" class="stat-buttons hidden">
+                    <button class="stat-btn" data-stat="matches">Matches</button>
+                    <button class="stat-btn" data-stat="wickets">Wickets</button>
+                    <button class="stat-btn" data-stat="average">Average</button>
+                    <button class="stat-btn" data-stat="economy">Economy</button>
+                    <button class="stat-btn" data-stat="five_wicket_hauls">5-Wicket Hauls</button>
+                </div>
+            </div>
+
+            <div class="guess-area hidden">
+                <h3>Guess the <span id="selected-stat">stat</span>:</h3>
+                <div class="guess-input">
+                    <input type="number" id="guess-input" min="0" step="0.01">
+                    <button id="submit-guess">Submit Guess</button>
+                </div>
+            </div>
+
+            <div class="result-area hidden">
+                <h3 id="result-message">Result</h3>
+                <p>Actual <span id="result-stat-name">stat</span>: <span id="actual-value">0</span></p>
+                <p>Your guess: <span id="user-guess">0</span></p>
+                <p>Score: <span id="score">0</span></p>
+                <button id="next-player">Next Player</button>
+            </div>
+
+            <div class="score-display">
+                <h3>Total Score: <span id="total-score">0</span></h3>
+                <p>Round: <span id="round-counter">0</span>/10</p>
+            </div>
+        </div>
+
+        <div class="game-controls">
+            <button id="start-game">Start Game</button>
+            <button id="restart-game" class="hidden">Restart Game</button>
+        </div>
+    </div>
+
+    <div class="game-over hidden">
+        <h2>Game Over!</h2>
+        <p>Final Score: <span id="final-score">0</span></p>
+        <button id="play-again">Play Again</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
