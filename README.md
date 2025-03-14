@@ -5,7 +5,7 @@ A fun interactive game where players can test their cricket knowledge by guessin
 ## Features
 
 - Two game modes: Batting Stats and Bowling Stats
-- Guess various statistics like runs, wickets, averages, and more
+- Random stat selection for each player - guess runs, wickets, averages, and more
 - Score based on how close your guess is to the actual value
 - 10 rounds per game with different players
 - Beautiful and responsive UI with a sleek dark theme
@@ -15,8 +15,8 @@ A fun interactive game where players can test their cricket knowledge by guessin
 1. Open `index.html` in your web browser
 2. Select a game mode (Batting or Bowling)
 3. Click "Start Game"
-4. For each player shown, select a statistic to guess
-5. Enter your guess and click "Submit"
+4. For each player shown, you'll be asked to guess a randomly selected statistic
+5. Enter your guess and click "Submit" (or press Enter)
 6. See how close you were and your score for that round
 7. Continue for 10 rounds to get your final score
 8. Try to beat your high score!

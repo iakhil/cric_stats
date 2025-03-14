@@ -11,7 +11,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Cricket Stats Guessing Game</h1>
+        <h1>Test Cricket Stats Guessing Game</h1>
         
         <div class="mode-selection">
             <h2>Select Game Mode</h2>
@@ -28,23 +28,8 @@
                 <p id="player-span">Career Span</p>
             </div>
 
-            <div class="stat-selection">
-                <h3>Select a stat to guess:</h3>
-                <div id="batting-stats" class="stat-buttons">
-                    <button class="stat-btn" data-stat="matches">Matches</button>
-                    <button class="stat-btn" data-stat="runs">Runs</button>
-                    <button class="stat-btn" data-stat="average">Average</button>
-                    <button class="stat-btn" data-stat="hundreds">Hundreds</button>
-                    <button class="stat-btn" data-stat="fifties">Fifties</button>
-                </div>
-                <div id="bowling-stats" class="stat-buttons hidden">
-                    <button class="stat-btn" data-stat="matches">Matches</button>
-                    <button class="stat-btn" data-stat="wickets">Wickets</button>
-                    <button class="stat-btn" data-stat="average">Average</button>
-                    <button class="stat-btn" data-stat="economy">Economy</button>
-                    <button class="stat-btn" data-stat="five_wicket_hauls">5-Wicket Hauls</button>
-                </div>
-            </div>
+            <div id="batting-stats" class="stat-buttons hidden"></div>
+            <div id="bowling-stats" class="stat-buttons hidden"></div>
 
             <div class="guess-area hidden">
                 <h3>Guess the <span id="selected-stat">stat</span>:</h3>

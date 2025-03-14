@@ -9,6 +9,10 @@ let currentRound = 0;
 let maxRounds = 10;
 let usedPlayers = [];
 
+// Stats available for guessing
+const battingStats = ['matches', 'runs', 'average', 'hundreds', 'fifties'];
+const bowlingStats = ['matches', 'wickets', 'average', 'economy', 'five_wicket_hauls'];
+
 // DOM Elements
 const battingModeBtn = document.getElementById('batting-mode');
 const bowlingModeBtn = document.getElementById('bowling-mode');
@@ -67,17 +71,19 @@ function setupEventListeners() {
     battingModeBtn.addEventListener('click', () => switchMode('batting'));
     bowlingModeBtn.addEventListener('click', () => switchMode('bowling'));
     
-    // Stat selection
-    document.querySelectorAll('.stat-btn').forEach(btn => {
-        btn.addEventListener('click', () => selectStat(btn.dataset.stat));
-    });
-    
     // Game controls
     submitGuessBtn.addEventListener('click', submitGuess);
     nextPlayerBtn.addEventListener('click', nextPlayer);
     startGameBtn.addEventListener('click', startGame);
     restartGameBtn.addEventListener('click', restartGame);
     playAgainBtn.addEventListener('click', restartGame);
+    
+    // Enter key for submitting guess
+    guessInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            submitGuess();
+        }
+    });
 }
 
 // Switch between batting and bowling modes
@@ -88,37 +94,24 @@ function switchMode(mode) {
     if (mode === 'batting') {
         battingModeBtn.classList.add('active');
         bowlingModeBtn.classList.remove('active');
-        battingStatsDiv.classList.remove('hidden');
-        bowlingStatsDiv.classList.add('hidden');
     } else {
         battingModeBtn.classList.remove('active');
         bowlingModeBtn.classList.add('active');
-        battingStatsDiv.classList.add('hidden');
-        bowlingStatsDiv.classList.remove('hidden');
     }
     
-    // Reset stat selection
-    document.querySelectorAll('.stat-btn').forEach(btn => {
-        btn.classList.remove('selected');
-    });
-    
-    selectedStat = '';
-    guessArea.classList.add('hidden');
+    // Hide stat selection buttons as they're no longer needed
+    battingStatsDiv.classList.add('hidden');
+    bowlingStatsDiv.classList.add('hidden');
 }
 
-// Select a stat to guess
-function selectStat(stat) {
-    selectedStat = stat;
+// Randomly select a stat to guess
+function selectRandomStat() {
+    const stats = currentMode === 'batting' ? battingStats : bowlingStats;
+    const randomIndex = Math.floor(Math.random() * stats.length);
+    selectedStat = stats[randomIndex];
     
-    // Update UI
-    document.querySelectorAll('.stat-btn').forEach(btn => {
-        btn.classList.remove('selected');
-    });
-    
-    document.querySelector(`[data-stat="${stat}"]`).classList.add('selected');
-    
-    // Show guess area
-    selectedStatEl.textContent = formatStatName(stat);
+    // Show guess area with the randomly selected stat
+    selectedStatEl.textContent = formatStatName(selectedStat);
     guessArea.classList.remove('hidden');
     resultArea.classList.add('hidden');
     
@@ -191,14 +184,8 @@ function nextPlayer() {
     playerTeamEl.textContent = currentPlayer.team;
     playerSpanEl.textContent = currentPlayer.span;
     
-    // Reset UI
-    document.querySelectorAll('.stat-btn').forEach(btn => {
-        btn.classList.remove('selected');
-    });
-    
-    selectedStat = '';
-    guessArea.classList.add('hidden');
-    resultArea.classList.add('hidden');
+    // Select a random stat for this player
+    selectRandomStat();
 }
 
 // Submit guess
