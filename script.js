@@ -258,6 +258,18 @@ function nextPlayer() {
     selectRandomStat();
 }
 
+// Get actual value with special handling for non-numeric values
+function getActualValue(player, stat) {
+    const value = player[stat];
+    
+    // Handle non-numeric values like "-" by treating them as 0
+    if (value === "-" || value === "" || value === null || value === undefined) {
+        return 0;
+    }
+    
+    return parseFloat(value);
+}
+
 // Submit guess
 function submitGuess() {
     if (!selectedStat || !currentPlayer) return;
@@ -269,14 +281,14 @@ function submitGuess() {
         return;
     }
     
-    const actualValue = parseFloat(currentPlayer[selectedStat]);
+    const actualValue = getActualValue(currentPlayer, selectedStat);
     let roundScore = 0;
     
     // Calculate score based on accuracy
     if (selectedStat === 'average' || selectedStat === 'economy' || 
         selectedStat === 'ave' || selectedStat === 'econ') {
         // For decimal stats, score based on percentage difference
-        const percentDiff = Math.abs((guess - actualValue) / actualValue) * 100;
+        const percentDiff = Math.abs((guess - actualValue) / Math.max(actualValue, 0.01)) * 100;
         if (percentDiff <= 5) roundScore = 100;
         else if (percentDiff <= 10) roundScore = 80;
         else if (percentDiff <= 20) roundScore = 60;

@@ -34,6 +34,8 @@ A fun interactive game where players can test their cricket knowledge by guessin
 - **Batting Stats:** Matches, Runs, Average, Hundreds, Fifties
 - **Bowling Stats:** Matches, Wickets, Average, Economy, 5-Wicket Hauls
 
+> **Note:** In cases where a player has not achieved a certain stat (like centuries), the value may be displayed as "-" in the data. When guessing these stats, a value of 0 is the correct answer.
+
 ## Scoring System
 
 The scoring system is based on how close your guess is to the actual value:
