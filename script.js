@@ -1,6 +1,7 @@
 // Game state variables
 let battingData = [];
 let bowlingData = [];
+let currentFormat = 'test'; // Default format
 let currentMode = 'batting'; // Default mode
 let currentPlayer = null;
 let selectedStat = '';
@@ -10,10 +11,14 @@ let maxRounds = 10;
 let usedPlayers = [];
 
 // Stats available for guessing
-const battingStats = ['matches', 'runs', 'average', 'hundreds', 'fifties'];
-const bowlingStats = ['matches', 'wickets', 'average', 'economy', 'five_wicket_hauls'];
+const testBattingStats = ['matches', 'runs', 'average', 'hundreds', 'fifties'];
+const testBowlingStats = ['matches', 'wickets', 'average', 'economy', 'five_wicket_hauls'];
+const iplBattingStats = ['mat', 'runs', 'ave', 'centuries', 'fifties'];
+const iplBowlingStats = ['mat', 'wkts', 'ave', 'econ', 'fives'];
 
 // DOM Elements
+const testFormatBtn = document.getElementById('test-format');
+const iplFormatBtn = document.getElementById('ipl-format');
 const battingModeBtn = document.getElementById('batting-mode');
 const bowlingModeBtn = document.getElementById('bowling-mode');
 const battingStatsDiv = document.getElementById('batting-stats');
@@ -43,10 +48,13 @@ const playAgainBtn = document.getElementById('play-again');
 // Fetch data
 async function fetchData() {
     try {
-        const battingResponse = await fetch('cricket_batting_stats.json');
+        const battingFile = currentFormat === 'test' ? 'cricket_batting_stats.json' : 'ipl_batting.json';
+        const bowlingFile = currentFormat === 'test' ? 'cricket_bowling_stats.json' : 'ipl_bowling.json';
+        
+        const battingResponse = await fetch(battingFile);
         battingData = await battingResponse.json();
         
-        const bowlingResponse = await fetch('cricket_bowling_stats.json');
+        const bowlingResponse = await fetch(bowlingFile);
         bowlingData = await bowlingResponse.json();
         
         console.log('Data loaded successfully');
@@ -56,10 +64,19 @@ async function fetchData() {
     }
 }
 
+// Function to update the game title based on format
+function updateGameTitle() {
+    const titleEl = document.querySelector('h1');
+    titleEl.textContent = `${currentFormat === 'test' ? 'Test' : 'IPL'} Cricket Stats Guessing Game`;
+}
+
 // Initialize the game
 async function initGame() {
     // Apply dark theme
     document.body.classList.add('dark-theme');
+    
+    // Set initial game title
+    updateGameTitle();
     
     await fetchData();
     setupEventListeners();
@@ -67,6 +84,10 @@ async function initGame() {
 
 // Set up event listeners
 function setupEventListeners() {
+    // Format selection
+    testFormatBtn.addEventListener('click', () => switchFormat('test'));
+    iplFormatBtn.addEventListener('click', () => switchFormat('ipl'));
+    
     // Mode selection
     battingModeBtn.addEventListener('click', () => switchMode('batting'));
     bowlingModeBtn.addEventListener('click', () => switchMode('bowling'));
@@ -84,6 +105,26 @@ function setupEventListeners() {
             submitGuess();
         }
     });
+}
+
+// Switch between Test and IPL formats
+function switchFormat(format) {
+    currentFormat = format;
+    
+    // Update UI
+    if (format === 'test') {
+        testFormatBtn.classList.add('active');
+        iplFormatBtn.classList.remove('active');
+    } else {
+        testFormatBtn.classList.remove('active');
+        iplFormatBtn.classList.add('active');
+    }
+    
+    // Update the game title
+    updateGameTitle();
+    
+    // Reload data for the new format
+    fetchData();
 }
 
 // Switch between batting and bowling modes
@@ -104,9 +145,18 @@ function switchMode(mode) {
     bowlingStatsDiv.classList.add('hidden');
 }
 
+// Function to get the current stats array based on format and mode
+function getCurrentStats() {
+    if (currentFormat === 'test') {
+        return currentMode === 'batting' ? testBattingStats : testBowlingStats;
+    } else {
+        return currentMode === 'batting' ? iplBattingStats : iplBowlingStats;
+    }
+}
+
 // Randomly select a stat to guess
 function selectRandomStat() {
-    const stats = currentMode === 'batting' ? battingStats : bowlingStats;
+    const stats = getCurrentStats();
     const randomIndex = Math.floor(Math.random() * stats.length);
     selectedStat = stats[randomIndex];
     
@@ -123,6 +173,7 @@ function selectRandomStat() {
 // Format stat name for display
 function formatStatName(stat) {
     const formattedNames = {
+        // Test cricket stats
         'matches': 'Matches',
         'runs': 'Runs',
         'average': 'Average',
@@ -130,7 +181,15 @@ function formatStatName(stat) {
         'fifties': 'Fifties',
         'wickets': 'Wickets',
         'economy': 'Economy Rate',
-        'five_wicket_hauls': '5-Wicket Hauls'
+        'five_wicket_hauls': '5-Wicket Hauls',
+        
+        // IPL stats
+        'mat': 'Matches',
+        'ave': 'Average',
+        'centuries': 'Hundreds',
+        'wkts': 'Wickets',
+        'econ': 'Economy Rate',
+        'fives': '5-Wicket Hauls'
     };
     
     return formattedNames[stat] || stat;
@@ -179,9 +238,20 @@ function nextPlayer() {
     usedPlayers.push(randomIndex);
     currentPlayer = data[randomIndex];
     
-    // Update player info
-    playerNameEl.textContent = currentPlayer.name;
-    playerTeamEl.textContent = currentPlayer.team;
+    // Update player info based on format
+    if (currentFormat === 'test') {
+        playerNameEl.textContent = currentPlayer.name;
+    } else {
+        // For IPL format, extract just the player name without the team
+        const fullPlayerName = currentPlayer.player;
+        const nameMatch = fullPlayerName.match(/^(.*?)\s*\(/);
+        playerNameEl.textContent = nameMatch ? nameMatch[1] : fullPlayerName;
+    }
+    
+    playerTeamEl.textContent = currentFormat === 'test' ? 
+        currentPlayer.team : 
+        (currentPlayer.player.match(/\((.*?)\)/) || ['', ''])[1];
+    
     playerSpanEl.textContent = currentPlayer.span;
     
     // Select a random stat for this player
@@ -199,11 +269,12 @@ function submitGuess() {
         return;
     }
     
-    const actualValue = currentPlayer[selectedStat];
+    const actualValue = parseFloat(currentPlayer[selectedStat]);
     let roundScore = 0;
     
     // Calculate score based on accuracy
-    if (selectedStat === 'average' || selectedStat === 'economy') {
+    if (selectedStat === 'average' || selectedStat === 'economy' || 
+        selectedStat === 'ave' || selectedStat === 'econ') {
         // For decimal stats, score based on percentage difference
         const percentDiff = Math.abs((guess - actualValue) / actualValue) * 100;
         if (percentDiff <= 5) roundScore = 100;
@@ -212,39 +283,52 @@ function submitGuess() {
         else if (percentDiff <= 30) roundScore = 40;
         else if (percentDiff <= 50) roundScore = 20;
         else roundScore = 10;
+        
+        // Show result
+        if (percentDiff <= 5) {
+            resultMessage.textContent = 'Excellent guess!';
+        } else if (percentDiff <= 20) {
+            resultMessage.textContent = 'Good guess!';
+        } else if (percentDiff <= 50) {
+            resultMessage.textContent = 'Not bad!';
+        } else {
+            resultMessage.textContent = 'Try again!';
+        }
     } else {
-        // For integer stats, score based on percentage difference
-        const percentDiff = Math.abs((guess - actualValue) / actualValue) * 100;
+        // For integer stats, score based on absolute difference
+        const absDiff = Math.abs(guess - actualValue);
+        const maxValue = Math.max(actualValue, 1); // Avoid division by zero
+        const percentDiff = (absDiff / maxValue) * 100;
+        
         if (percentDiff <= 5) roundScore = 100;
         else if (percentDiff <= 10) roundScore = 80;
         else if (percentDiff <= 20) roundScore = 60;
         else if (percentDiff <= 30) roundScore = 40;
         else if (percentDiff <= 50) roundScore = 20;
         else roundScore = 10;
+        
+        // Show result
+        if (percentDiff <= 5) {
+            resultMessage.textContent = 'Excellent guess!';
+        } else if (percentDiff <= 20) {
+            resultMessage.textContent = 'Good guess!';
+        } else if (percentDiff <= 50) {
+            resultMessage.textContent = 'Not bad!';
+        } else {
+            resultMessage.textContent = 'Try again!';
+        }
     }
     
-    // Update total score
+    // Update score
     totalScore += roundScore;
+    totalScoreEl.textContent = totalScore;
+    scoreEl.textContent = roundScore;
     
-    // Update UI
+    // Show result area
     resultStatName.textContent = formatStatName(selectedStat);
     actualValueEl.textContent = actualValue;
     userGuessEl.textContent = guess;
-    scoreEl.textContent = roundScore;
-    totalScoreEl.textContent = totalScore;
     
-    // Show result message
-    if (roundScore >= 80) {
-        resultMessage.textContent = 'Excellent guess!';
-    } else if (roundScore >= 60) {
-        resultMessage.textContent = 'Good guess!';
-    } else if (roundScore >= 40) {
-        resultMessage.textContent = 'Not bad!';
-    } else {
-        resultMessage.textContent = 'Try again!';
-    }
-    
-    // Show result area
     guessArea.classList.add('hidden');
     resultArea.classList.remove('hidden');
 }

@@ -52,17 +52,7 @@ h3 {
 
 .mode-selection {
     text-align: center;
-    margin-bottom: 30px;
-    background-color: var(--card-background);
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.mode-selection:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    margin-bottom: 2rem;
 }
 
 .mode-buttons {
@@ -286,4 +276,33 @@ h3 {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.format-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    justify-content: center;
+}
+
+.format-btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--secondary-color);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.format-btn:hover {
+    background-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.format-btn.active {
+    background-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
 } 
