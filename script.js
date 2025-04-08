@@ -204,7 +204,6 @@ function startGame() {
     
     // Update UI
     totalScoreEl.textContent = totalScore;
-    roundCounterEl.textContent = currentRound;
     startGameBtn.classList.add('hidden');
     restartGameBtn.classList.remove('hidden');
     
@@ -226,6 +225,14 @@ function nextPlayer() {
     
     // Get random player
     const data = currentMode === 'batting' ? battingData : bowlingData;
+    
+    // Safety check to make sure data is loaded
+    if (!data || data.length === 0) {
+        console.error("No data available for", currentMode, "in", currentFormat, "format");
+        alert("No player data available. Please check that JSON files are loaded correctly.");
+        return;
+    }
+    
     let randomIndex;
     let attempts = 0;
     
@@ -238,24 +245,42 @@ function nextPlayer() {
     usedPlayers.push(randomIndex);
     currentPlayer = data[randomIndex];
     
-    // Update player info based on format
-    if (currentFormat === 'test') {
-        playerNameEl.textContent = currentPlayer.name;
-    } else {
-        // For IPL format, extract just the player name without the team
-        const fullPlayerName = currentPlayer.player;
-        const nameMatch = fullPlayerName.match(/^(.*?)\s*\(/);
-        playerNameEl.textContent = nameMatch ? nameMatch[1] : fullPlayerName;
+    // Safety check for player data
+    if (!currentPlayer) {
+        console.error("Invalid player data at index", randomIndex);
+        nextPlayer(); // Try again with a different player
+        return;
     }
     
-    playerTeamEl.textContent = currentFormat === 'test' ? 
-        currentPlayer.team : 
-        (currentPlayer.player.match(/\((.*?)\)/) || ['', ''])[1];
-    
-    playerSpanEl.textContent = currentPlayer.span;
-    
-    // Select a random stat for this player
-    selectRandomStat();
+    try {
+        // Update player info based on format
+        if (currentFormat === 'test') {
+            playerNameEl.textContent = currentPlayer.name || "Unknown Player";
+            playerTeamEl.textContent = currentPlayer.team || "Unknown Team";
+        } else {
+            // For IPL format, extract just the player name without the team
+            if (currentPlayer.player) {
+                const fullPlayerName = currentPlayer.player;
+                const nameMatch = fullPlayerName.match(/^(.*?)\s*\(/);
+                playerNameEl.textContent = nameMatch ? nameMatch[1].trim() : fullPlayerName;
+                
+                // Extract team from player field (inside parentheses)
+                const teamMatch = fullPlayerName.match(/\((.*?)\)/);
+                playerTeamEl.textContent = teamMatch ? teamMatch[1].trim() : "";
+            } else {
+                playerNameEl.textContent = "Unknown Player";
+                playerTeamEl.textContent = "Unknown Team";
+            }
+        }
+        
+        playerSpanEl.textContent = currentPlayer.span || "";
+        
+        // Select a random stat for this player
+        selectRandomStat();
+    } catch (error) {
+        console.error("Error processing player data:", error, currentPlayer);
+        nextPlayer(); // Try again with a different player
+    }
 }
 
 // Get actual value with special handling for non-numeric values
@@ -267,7 +292,14 @@ function getActualValue(player, stat) {
         return 0;
     }
     
-    return parseFloat(value);
+    // Handle cases where the value might contain non-numeric characters
+    const parsedValue = parseFloat(value);
+    if (isNaN(parsedValue)) {
+        console.warn(`Non-numeric value found for ${stat}: ${value}`);
+        return 0;
+    }
+    
+    return parsedValue;
 }
 
 // Submit guess
@@ -288,6 +320,7 @@ function submitGuess() {
     if (selectedStat === 'average' || selectedStat === 'economy' || 
         selectedStat === 'ave' || selectedStat === 'econ') {
         // For decimal stats, score based on percentage difference
+        // Use a minimum value of 0.01 to avoid division by zero
         const percentDiff = Math.abs((guess - actualValue) / Math.max(actualValue, 0.01)) * 100;
         if (percentDiff <= 5) roundScore = 100;
         else if (percentDiff <= 10) roundScore = 80;
@@ -309,7 +342,8 @@ function submitGuess() {
     } else {
         // For integer stats, score based on absolute difference
         const absDiff = Math.abs(guess - actualValue);
-        const maxValue = Math.max(actualValue, 1); // Avoid division by zero
+        // Use a minimum value of 1 to avoid division by zero
+        const maxValue = Math.max(actualValue, 1);
         const percentDiff = (absDiff / maxValue) * 100;
         
         if (percentDiff <= 5) roundScore = 100;
